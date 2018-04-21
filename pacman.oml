@@ -35,20 +35,6 @@ let creerCarteInitiale () = [|[|0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
 					[|0;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;0|];
 					[|0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0|]|];;
 
-let faireAvancerJoueur posx posy jx jy mousex mousey vitesse = 
-	let x = mousex - jx and y = mousey - jy in
-	let norme = sqrt ((float_of_int x)**2. +. (float_of_int y)**2.) in
-	let vectx = int_of_float ((float_of_int (x*vitesse))/.norme) and
-		vecty = int_of_float ((float_of_int (y*vitesse))/.norme) in
-	
-	set_color (rgb 100 100 100);
-	fill_rect 0 0 (2*jx) (2*jy);
-	
-	posx := !posx + vectx;
-	posy := !posy + vecty;
-	set_color (rgb 250 80 40);
-	fill_circle (jx + 3*vectx) (jy + 3*vecty) 15;;
-
 let afficherCarteTotale carte = 
 	for i=0 to 30 do
 		let t = carte.(i) in
@@ -78,9 +64,40 @@ let casesAutour x y carte = let px = x + 8 and py = 620 - (y - 100 + 8) in
 		[|carte.(py/20).(px/20-1);carte.(py/20).(px/20);carte.(py/20).(px/20+1)|];
 		[|carte.(py/20-1).(px/20-1);carte.(py/20-1).(px/20);carte.(py/20-1).(px/20+1)|]|];;
 
-let gererCollisions posx posy carte = 
+let gererCollisions posx posy carte n = 
 	let px = !posx + 8 and py = 620 - (!posy - 100 + 8) in
-	if carte.(py/20).(px/20) = 2 then carte.(py/20).(px/20) <- 1;;
+	if carte.(py/20).(px/20) = 2 || carte.(py/20).(px/20) = 3 then 
+		begin
+			carte.(py/20).(px/20) <- 1;
+			n := !n-1;
+			set_color (rgb 100 100 100);
+			fill_rect 280 40 240 40;
+			moveto 280 60;
+			set_color (black);
+			draw_string (string_of_int !nbPacgums);
+		end;;
+
+let nombrePacgums carte = let n = ref 0 in
+	for i=0 to 30 do
+		for j=0 to 27 do
+			if carte.(i).(j) = 2 || carte.(i).(j) = 3 then n:= !n+1;
+		done;
+	done;
+	!n;;
+
+let faireAvancerJoueur posx posy jx jy mousex mousey vitesse = 
+	let x = mousex - jx and y = mousey - jy in
+	let norme = sqrt ((float_of_int x)**2. +. (float_of_int y)**2.) in
+	let vectx = int_of_float ((float_of_int (x*vitesse))/.norme) and
+		vecty = int_of_float ((float_of_int (y*vitesse))/.norme) in
+	
+	set_color (rgb 100 100 100);
+	fill_rect 0 0 (2*jx) (2*jy);
+	
+	posx := !posx + vectx;
+	posy := !posy + vecty;
+	set_color (rgb 250 80 40);
+	fill_circle (jx + 3*vectx) (jy + 3*vecty) 15;;
 
 let jeu =
 	open_graph " 560x720";
@@ -89,26 +106,35 @@ let jeu =
 	tempsProgramme = ref (time()) and
 	tailleMenu = 100 and
 	posx = ref (size_x()/2) and
-	posy = ref 244 and
-	carte = creerCarteInitiale () in
+	posy = ref 260 and
+	vitesse = 3 and
+	carte = creerCarteInitiale () and
+	nbPacgums = ref (nombrePacgums (creerCarteInitiale ())) in
 	
 	set_color (rgb 100 100 100);
 	fill_rect 0 0 (size_x()) tailleMenu;
 	afficherCarteTotale carte;
+	moveto 280 60;
+	set_text_size 30;
+	set_color (black);
+	draw_string (string_of_int !nbPacgums);
 	
-	while !posx < size_x() && !posx > 0 && !posy > tailleMenu && !posy < size_y() do
+	while !nbPacgums > 0 do
 	
 		while time() -. !tempsProgramme < framerate do
 			posy := !posy;
 		done;
-
+		tempsProgramme := (time());
+		
 		afficherCarte carte;
 		
 		let (mx,my) = mouse_pos() in
-		faireAvancerJoueur posx posy (tailleMenu/2) (tailleMenu/2) mx my 2;
-		gererCollisions posx posy carte;
+		faireAvancerJoueur posx posy (tailleMenu/2) (tailleMenu/2) mx my vitesse;
+		gererCollisions posx posy carte nbPacgums;
 		
 		set_color(rgb 200 200 0);
 		fill_rect !posx !posy 16 16;
-		tempsProgramme := (time());
+		moveto 280 60;
+		set_color (black);
+		draw_string (string_of_int !nbPacgums);
 	done;;

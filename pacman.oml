@@ -99,8 +99,8 @@ let faireAvancerJoueur posx posy jx jy mousex mousey vitesse carte =
 		(* Vérifier qu'on va pas sur des cases noires autour *)
 	if carte.(i+1 mod 31).(j) = 0 && vecty<0 then (* case du bas *)
 		begin
-			set_color (blue);
-			fill_rect (20*(!posx/20)) (20*(aposy/20-1)) 20 20;
+			(*set_color (blue);
+			fill_rect (20*(!posx/20)) (20*(aposy/20-1)) 20 20;*)
 			if !posy - (20*(aposy/20-1)) < 20 then posy := 20*(aposy/20)+1;
 		end;
 	if carte.(i-1).(j) = 0 && vecty>0 then (* case du haut *)
@@ -113,8 +113,8 @@ let faireAvancerJoueur posx posy jx jy mousex mousey vitesse carte =
 		end;
 	if carte.(i).(j+1 mod 28) = 0 && vectx > 0 then (* case de droite *)
 		begin
-			set_color (magenta);
-			fill_rect (20*(!posx/20+1)) (20*(aposy/20)) 20 20;
+			(*set_color (magenta);
+			fill_rect (20*(!posx/20+1)) (20*(aposy/20)) 20 20;*)
 			if (20*(aposx/20+1)) - !posx  < 16 then posx := 20*(aposx/20+1)-16;
 		end;
 	
